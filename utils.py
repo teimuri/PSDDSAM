@@ -351,13 +351,10 @@ def create_prompt(probabilities, forground=2, background=2):
 #     # raise ValueError(all_points , all_labels )
 
 #     return all_points, all_labels
-###############################################armin###########################################
+##########################################################################################
 
-# import torch
-# import torch.nn.functional as F
-# import numpy as np
 device = "cuda:0"
-def create_prompt_armin(probabilities):
+def create_prompt_yours(probabilities):
     probabilities = probabilities.sigmoid()
 
     # Thresholding function
@@ -411,7 +408,7 @@ def create_prompt_armin(probabilities):
     return indices.unsqueeze(0), values.unsqueeze(0)
 
 #############################versionGroundTure################################################
-# def create_prompt_armin_for_ground_true(probabilities):
+# def create_prompt_yours_for_ground_true(probabilities):
 #     probabilities = probabilities
 #     # raise ValueError(probabilities)
 
