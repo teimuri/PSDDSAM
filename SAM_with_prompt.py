@@ -251,7 +251,7 @@ class panc_sam(nn.Module):
         super().__init__(*args, **kwargs)
         self.sam = sam_model_registry[model_type](checkpoint=checkpoint)
         # self.sam = torch.load(
-        #     "/mnt/new_drive/PanCanAid/PanCanAid-segmentation/exps/correct_prompt/sam_tuned_save.pth"
+        #     "your weights /sam_tuned_save.pth"
         # ).sam
 
 
@@ -327,11 +327,11 @@ panc_sam_instance.train()
 
 train_dataset = PanDataset(
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/train/images"],
+     "your address of images"],
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/train/labels"],
-    # ["/mnt/new_drive/PanCanAid/Data/NIH_PNG/train/images"],
-    # ["/mnt/new_drive/PanCanAid/Data/NIH_PNG/train/labels"],
+     "your address of labels"],
+    # ["your address of images"],
+    # ["your address of labels"],
     [["NIH_PNG",1]],
     
     image_size,
@@ -342,9 +342,9 @@ train_dataset = PanDataset(
 )
 test_dataset = PanDataset(
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/test/images"],
+     "your address of images"],
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/test/labels"],
+     "your address of labels"],
         
     [["NIH_PNG",1]],
 
