@@ -6,8 +6,10 @@ In this repositpry we describe the code impelmentation of the paper: "Pancreas S
 
 ## Requirments
 Frist step is install [requirements.txt](/requirements.txt) bakages in a conda eviroment.
+
 Clone the [SAM](https://github.com/facebookresearch/segment-anything) repository.
-use the code below to download the suggested checkpoint of SAM:
+
+Use the code below to download the suggested checkpoint of SAM:
 ```
 !wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
 ```
