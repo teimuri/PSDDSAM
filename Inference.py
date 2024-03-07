@@ -228,7 +228,7 @@ class panc_sam(nn.Module):
         super().__init__(*args, **kwargs)
         
         #Promptless
-        sam = torch.load(" your prompt weightes exps/0-SAMwithoutprompt-5e-5_5e-4/sam_tuned_save.pth").sam
+        sam = torch.load("weightes/sam_tuned_save.pth").sam
         
         self.prompt_encoder = sam.prompt_encoder
         
@@ -241,8 +241,7 @@ class panc_sam(nn.Module):
         
         #with Prompt
         sam = torch.load(
-            "your prompt weightes continue_correct_prompt/sam_tuned_save.pth"
-            # "your prompt weightes 0-change_point_algo/sam_tuned_save.pth"
+            "weightes/sam_tuned_save.pth"
         ).sam
         self.image_encoder = sam.image_encoder
         self.prompt_encoder2 = sam.prompt_encoder
@@ -351,21 +350,7 @@ panc_sam_instance.train()
 
 ##################load data#######################
 
-train_dataset = PanDataset(
-    [
-     "your images address"],
-    [
-     "your labels address"],
-    # ["your images address"],
-    # ["your labels address"],
-    [["NIH_PNG",1]],
-    
-    image_size,
-    
-    slice_per_image=slice_per_image,
-    train=True,
-    augmentation=augmentation,
-)
+
 test_dataset = PanDataset(
     [
      "your images iamges"],
@@ -394,14 +379,7 @@ test_dataset = PanDataset(
 #     train=False,
 # )
 
-train_loader = DataLoader(
-    train_dataset,
-    batch_size=batch_size,
-    collate_fn=train_dataset.collate_fn,
-    shuffle=True,
-    drop_last=False,
-    num_workers=num_workers,
-)
+
 test_loader = DataLoader(
     test_dataset,
     batch_size=batch_size,
@@ -413,7 +391,7 @@ test_loader = DataLoader(
 ##################end load data#######################
 
 lr = 1e-4
-max_lr = 1e-3
+max_lr = 5e-5
 wd = 5e-4
 
 optimizer_main = torch.optim.Adam(
@@ -522,11 +500,9 @@ def process_model(main_model , data_loader, train=0, save_output=0):
 
 
 
-def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_start=7):
+def train_model( test_loader, K_fold=False, N_fold=7, epoch_num_start=7):
     print("Train model started.")
 
-    train_losses = []
-    train_epochs = []
     test_losses = []
     test_epochs = []
     dice = []
@@ -568,5 +544,5 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
     # return train_losses,  results
 
 
-train_model(train_loader, test_loader)
+train_model(test_loader)
 
