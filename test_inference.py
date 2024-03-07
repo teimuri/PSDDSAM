@@ -260,7 +260,7 @@ class panc_sam(nn.Module):
         super().__init__(*args, **kwargs)
         # self.sam = sam_model_registry[model_type](checkpoint=checkpoint)
         self.sam = torch.load(
-            "your sam_tuned_save.pth"
+            "sam_tuned_save.pth"
         ).sam
 
 
@@ -313,18 +313,13 @@ class panc_sam(nn.Module):
     
     
 panc_sam_instance = panc_sam()
-# panc_sam_instance = torch.load(
-        #     "your sam_tuned_save.pth"
-        # ).sam
-# panc_sam_instance.torch.load("your sam_tuned_save.pth").sam
+
 panc_sam_instance.to(device)
 panc_sam_instance.eval()  # Set the model to evaluation mode
 
 test_dataset = PanDataset(
-    [
-     "your address of images"],
-    [
-     "your address of labels"],
+    [args.test_dir],
+    [args.tests_labels_dir],
     [["NIH_PNG",1]],
     image_size,
     slice_per_image=slice_per_image,
@@ -345,7 +340,6 @@ wd = 5e-4
 optimizer = torch.optim.Adam(
     # parameters,
     list(panc_sam_instance.sam.mask_decoder.parameters()),
-    # list(panc_sam_instance.mask_decoder.parameters()),
     lr=lr,
     weight_decay=wd,
 )
@@ -355,10 +349,6 @@ scheduler = torch.optim.lr_scheduler.OneCycleLR(
     epochs=num_epochs,
     steps_per_epoch=sample_size // (accumaltive_batch_size // batch_size),
 )
-# raise ValueError(sam_model.image_encoder.parameters())
-# for p in sam_model.image_encoder.parameters():
-#     p.requires_grad = True
-
 loss_function = loss_fn(alpha=0.5, gamma=2.0)
 loss_function.to(device)
 from statistics import mean
@@ -379,16 +369,11 @@ def process_model(data_loader, train=False, save_output=0):
 
     counterb = 0
     for image, label in tqdm(data_loader, total=sample_size):
-        #s_time.sleep(0.6)
         counterb += 1
 
         index += 1
         image = image.to(device)
         label = label.to(device).float()
-
-        # input_size = (1024, 1024)
-
-        # box = torch.tensor([[200, 200, 750, 800]]).to(device)
         points, point_labels = create_prompt(label)
 
         batched_input = []
@@ -399,7 +384,6 @@ def process_model(data_loader, train=False, save_output=0):
                     "point_coords": points[ibatch],
                     "point_labels": point_labels[ibatch],
                     "original_size": (1024, 1024)
-                    # 'original_size': image1.shape[:2]
                 },
             )
 
@@ -420,20 +404,12 @@ def process_model(data_loader, train=False, save_output=0):
             opened_binary_mask.numpy(), low_res_label.cpu().detach().numpy()
         )
         accuracy = calculate_accuracy(binary_mask, low_res_label)
-        # print("accuracy:" , accuracy)
         sensitivity = calculate_sensitivity(binary_mask, low_res_label)
-        # print("sensitivity",sensitivity)
         
         specificity = calculate_specificity(binary_mask, low_res_label)
-        # print("specificity" , specificity)
-        
-        # recall = calculate_recall(binary_mask, low_res_label)
-        # print(recall)
-        
         total_accuracy += accuracy
         total_sensitivity += sensitivity
         total_specificity += specificity
-        # print(dice)
         total_dice += dice
         num_samples += 1
         average_dice = total_dice / num_samples
@@ -445,7 +421,6 @@ def process_model(data_loader, train=False, save_output=0):
             loss.backward()
 
             if index % (accumaltive_batch_size / batch_size) == 0:
-                # print(loss)
                 optimizer.step()
                 scheduler.step()
                 optimizer.zero_grad()

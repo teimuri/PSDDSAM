@@ -22,9 +22,10 @@ from time import time
 from PIL import Image
 from sklearn.model_selection import KFold
 from shutil import copyfile
+from args import get_arguments
 
 # import wandb_handler
-
+args = get_arguments()
 
 def save_img(img, dir):
     img = img.clone().cpu().numpy() + 100
@@ -144,7 +145,7 @@ num_workers = 4
 slice_per_image = 1
 num_epochs = 80
 sample_size = 2000
-# image_size=sam_model.image_encoder.img_size
+
 image_size = 1024
 exp_id = 0
 found=0
@@ -164,7 +165,7 @@ copyfile(os.path.realpath(__file__), f"exps/{exp_id}-{user_input}/code.py")
 
 
 
-model_type = "vit_h"
+model_type =args.modeltype
 checkpoint = "checkpoints/sam_vit_h_4b8939.pth"
 device = "cuda:1"
 
@@ -178,7 +179,7 @@ class panc_sam(nn.Module):
         super().__init__(*args, **kwargs)
           
         self.sam=sam_model_registry[model_type](checkpoint=checkpoint)
-        # self.sam  = torch.load('your fine tuned weightes /sam_tuned_save.pth').sam
+        # self.sam  = torch.load('exps/sam_tuned_save.pth').sam
         self.prompt_encoder =  self.sam.prompt_encoder
         for param in self.prompt_encoder.parameters():
             param.requires_grad = False
@@ -236,12 +237,9 @@ panc_sam_instance=panc_sam()
 panc_sam_instance.to(device)
 panc_sam_instance.train()
 train_dataset = PanDataset(
-    [
-     "addres of images"],
-    [
-     "addres of labels"],
-    # ["address of images"],
-    # ["address of labels"],
+    [args.train_dir],
+    [args.train_label_dir],
+
     [["NIH_PNG",1]],
     
     image_size,
@@ -251,10 +249,8 @@ train_dataset = PanDataset(
     augmentation=augmentation,
 )
 test_dataset = PanDataset(
-    [
-     "address of images"],
-    [
-     "addres of labels"],
+    [args.test_dir],
+    [args.test_label_dir],
         
     [["NIH_PNG",1]],
 
@@ -283,15 +279,14 @@ test_loader = DataLoader(
 
 # Set up the optimizer, hyperparameter tuning will improve performance here
 lr = 1e-4
-#1e-3
-max_lr = 3e-4 #3e-4✅5e-4/8e-4/1e-3
-wd = 5e-4#5e-4✅/1e-4/8e-4/1e-3
+
+max_lr = 3e-4 
+wd = 5e-4
 
 
 optimizer = torch.optim.Adam(
     # parameters,
     list(panc_sam_instance.sam.mask_decoder.parameters()),
-    # list(panc_sam_instance.mask_decoder.parameters()),
     lr=lr, weight_decay=wd
 )
 scheduler = torch.optim.lr_scheduler.OneCycleLR(
@@ -364,14 +359,7 @@ def process_model(data_loader, train=0, save_output=0):
 
         else:
             pass
-            # result = torch.cat(
-            #     (
-            #         low_res_masks[0].detach().cpu().reshape(1, 1, 256, 256),
-            #         binary_mask[0].reshape(1, 1, 256, 256),
-            #     ),
-            #     dim=0,
-            # )
-            # results = torch.cat((results, result), dim=1)
+
         if index % (accumaltive_batch_size / batch_size) == 0:
             epoch_losses.append(loss.item())
         if counterb == sample_size and train:
@@ -393,23 +381,6 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
     results = []
 
     index = 0
-    # for image, label in tqdm(test_loader):
-    #     if index < 100:
-    #         if not os.path.exists(f"ims/batch_{index}"):
-    #             os.mkdir(f"ims/batch_{index}")
-
-    #         save_img(
-    #             image[0],
-    #             f"ims/batch_{index}/img_0.png",
-    #         )
-    #         save_img(0.2*image[0][0] + label[0][0], f"ims/batch_{index}/gt_0.png")
-
-    #     index += 1
-    #     if index == 100:
-    #         break
-
-    # In each epoch we will train the model and the test it
-    # training without k_fold cross validation:
 
     last_best_dice = 0
     for epoch in range(num_epochs):

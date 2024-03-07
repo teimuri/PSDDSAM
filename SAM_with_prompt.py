@@ -25,7 +25,7 @@ from sklearn.model_selection import KFold
 from shutil import copyfile
 # import monai
 from tqdm import tqdm
-from utils import create_prompt_yours,create_prompt_yours_for_ground_true
+from utils import main_prompt,main_prompt_for_ground_true
 from torch.autograd import Variable
 
 # import wandb_handler
@@ -250,10 +250,6 @@ class panc_sam(nn.Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.sam = sam_model_registry[model_type](checkpoint=checkpoint)
-        # self.sam = torch.load(
-        #     "your weights /sam_tuned_save.pth"
-        # ).sam
-
 
     def forward(self, batched_input):
         # with torch.no_grad():
@@ -326,12 +322,9 @@ panc_sam_instance.to(device)
 panc_sam_instance.train()
 
 train_dataset = PanDataset(
-    [
-     "your address of images"],
-    [
-     "your address of labels"],
-    # ["your address of images"],
-    # ["your address of labels"],
+    [args.train_dir],
+    [args.train_labels_dir],
+
     [["NIH_PNG",1]],
     
     image_size,
@@ -341,10 +334,8 @@ train_dataset = PanDataset(
     augmentation=augmentation,
 )
 test_dataset = PanDataset(
-    [
-     "your address of images"],
-    [
-     "your address of labels"],
+    [args.test_dir],
+    [args.train_dir],
         
     [["NIH_PNG",1]],
 
@@ -425,7 +416,7 @@ def process_model(data_loader, train=0, save_output=0):
         input_size = (1024, 1024)
 
         box = torch.tensor([[200, 200, 750, 800]]).to(device)
-        points, point_labels = create_prompt_yours_for_ground_true(label)
+        points, point_labels = main_prompt_for_ground_true(label)
         # raise ValueError(points)
         batched_input = []
         for ibatch in range(batch_size):
@@ -504,32 +495,7 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
     results = []
     if debug==0:
         index = 0
-        # for image, label in tqdm(test_loader):
-            
-        #     points, point_labels = create_prompt_yours(label)
-        #     points = torch.cat((point_labels[0].unsqueeze(1),points[0]),dim=1).long()
 
-        #     # for point in points:
-        #     #     if point[0]:
-        #     #         image[0][point[0],point[2]-5:point[2]+5,point[1]-5:point[1]+5]=5
-        #     #     else:
-        #     #         image[0][point[0],point[1]-5:point[1]+5,point[2]-5:point[2]+5]=5
-
-            
-        #     # if index < 100:
-        #     #     if not os.path.exists(f"ims/batch_{index}"):
-        #     #         os.mkdir(f"ims/batch_{index}")
-
-        #     #     save_img(
-        #     #         image[0],
-        #     #         f"ims/batch_{index}/img_0.png",
-        #     #     )
-        #     #     save_img(0.2 * image[0][0] + label[0][0], f"ims/batch_{index}/gt_0.png")
-            
-
-        #     index += 1
-        #     if index == 100:
-        #         break
 
 
 

@@ -242,8 +242,8 @@ if __name__ == "__main__":
         ]
     )
     train_dataset = PanDataset(
-        "your images addres here",
-        "your labeles addres here",
+        "bath image",
+        "bath label",
         image_size,
         slice_per_image=slice_per_image,
         train=True,

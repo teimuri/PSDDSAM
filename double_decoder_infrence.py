@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import   create_prompt_yours , create_prompt
+from utils import   main_prompt , create_prompt
 from collections import defaultdict
 import torchvision.transforms as transforms
 import torch
@@ -195,7 +195,7 @@ class panc_sam(nn.Module):
             outputs_prompt.append(low_res_masks)
             
             # points, point_labels = create_prompt((low_res_masks > 0).float())
-            points, point_labels = create_prompt_yours(low_res_masks)
+            points, point_labels = main_prompt(low_res_masks)
             
             
             points = points * 4
@@ -226,12 +226,10 @@ class panc_sam(nn.Module):
 test_dataset = PanDataset(
     [
         
-     "your data images address"
-    # "your data images address"   
+     "path image"
      ],
     [
-     "your data  labels address"
-    #   "your data  labels address"
+     "path label"
      ],
         
     [["NIH_PNG",1]],
@@ -373,17 +371,17 @@ index = 0
 for image, label , raw_data in tqdm(test_dataset):
     
     if index < 200:
-        if not os.path.exists(f" your result_img/batch_{index}"):
-            os.mkdir(f" your result_img/batch_{index}")
+        if not os.path.exists(f"result_img/batch_{index}"):
+            os.mkdir(f"result_img/batch_{index}")
 
         save_img(
             image[0],
-            f" your result_img/batch_{index}/img.png",
+            f"result_img/batch_{index}/img.png",
         )
         tensor_raw = torch.tensor(raw_data)
         save_img(
             tensor_raw.T,
-            f" your result_img/batch_{index}/raw_img.png",
+            f"result_img/batch_{index}/raw_img.png",
         )
         
         model_result_resized = TF.resize(epoch_results, size=(1024, 1024))
@@ -403,15 +401,15 @@ for image, label , raw_data in tqdm(test_dataset):
         
         
 
-        save_img(blended_result, f" your result_img/batch_{index}/comb.png")
-        save_img(blended_result_prompt, f" your result_img/batch_{index}/comb_prompt.png")
+        save_img(blended_result, f"result_img/batch_{index}/comb.png")
+        save_img(blended_result_prompt, f"result_img/batch_{index}/comb_prompt.png")
         
         
         save_img(
-        epoch_results[1, index].clone(),f" your result_img/batch_{index}/modelresult.png",
+        epoch_results[1, index].clone(),f"result_img/batch_{index}/modelresult.png",
         )
         save_img(
-                epoch_results[0, index].clone(),f" your result_img/batch_{index}/prob_epoch_{index}.png",)
+                epoch_results[0, index].clone(),f"result_img/batch_{index}/prob_epoch_{index}.png",)
         
 
     index += 1

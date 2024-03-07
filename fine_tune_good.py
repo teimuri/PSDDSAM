@@ -3,13 +3,10 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import sample_prompt , main_prompt 
-
-# import cv2
 from collections import defaultdict
 import torchvision.transforms as transforms
 import torch
 from torch import nn
-
 import torch.nn.functional as F
 from segment_anything.utils.transforms import ResizeLongestSide
 import albumentations as A
@@ -24,9 +21,6 @@ from time import time
 from PIL import Image
 from sklearn.model_selection import KFold
 from shutil import copyfile
-
-# import wandb_handler
-
 
 def save_img(img, dir):
     img = img.clone().cpu().numpy() + 100
@@ -62,7 +56,6 @@ class loss_fn(torch.nn.Module):
 
     def tversky_loss(self, y_pred, y_true, alpha=0.8, beta=0.2, smooth=1e-2):
         y_pred = torch.sigmoid(y_pred)
-        # raise ValueError(y_pred)
         y_true_pos = torch.flatten(y_true)
         y_pred_pos = torch.flatten(y_pred)
         true_pos = torch.sum(y_true_pos * y_pred_pos)
@@ -159,7 +152,6 @@ num_workers = 2
 slice_per_image = 1
 num_epochs = 80
 sample_size = 2000
-# image_size=sam_model.image_encoder.img_size
 image_size = 1024
 exp_id = 0
 found = 0
@@ -174,69 +166,20 @@ while found == 0:
     except:
         exp_id = exp_id + 1
 copyfile(os.path.realpath(__file__), f"exps/{exp_id}-{user_input}/code.py")
-
-
 layer_n = 4
 L = layer_n
 a = np.full(L, layer_n)
 params = {"M": 255, "a": a, "p": 0.35}
-
-
 model_type = "vit_h"
 checkpoint = "checkpoints/sam_vit_h_4b8939.pth"
 device = "cuda:1"
-
-
 from segment_anything import SamPredictor, sam_model_registry
-
-
-##################################promt model#######################################
-# class panc_sam(nn.Module):
-#     def __init__(self, *args, **kwargs) -> None:
-#         super().__init__(*args, **kwargs)
-
-#         self.sam = sam_model_registry[model_type](checkpoint=checkpoint)
-#         self.sam = torch.load(
-#             "your weigghts here sam_tuned_save.pth"
-#         ).sam
-
-#         self.prompt_encoder = self.sam.prompt_encoder.clone()
-#         self.mask_decoder = self.sam.mask_decoder.clone()
-#         self.prompt_encoder2 = self.sam.prompt_encoder.clone()
-#         self.mask_decoder2 = self.sam.mask_decoder.clone()
-        
-
-
-
-#     def forward(self, image, box):
-#         with torch.no_grad():
-#             image_embedding = self.sam.image_encoder(image).detach()
-#             sparse_embeddings, dense_embeddings = self.prompt_encoder(
-#                 points=None,
-#                 boxes=box,
-#                 masks=None,
-#             )
-
-#             low_res_masks, _ = self.sam.mask_decoder(
-#                 image_embeddings=image_embedding,
-#                 image_pe=self.sam.prompt_encoder.get_dense_pe().detach(),
-#                 sparse_prompt_embeddings=sparse_embeddings.detach(),
-#                 dense_prompt_embeddings=dense_embeddings.detach(),
-#                 multimask_output=False,
-#             )
-
-#         return low_res_masks
-##################################end#######################################
-##################################main model#######################################
-
-
-
 class panc_sam(nn.Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         
         #Promptless
-        sam = torch.load("your weights here sam_tuned_save.pth").sam
+        sam = torch.load("exps/sam_tuned_save.pth").sam
         
         self.prompt_encoder = sam.prompt_encoder
         
@@ -249,9 +192,6 @@ class panc_sam(nn.Module):
         
         #with Prompt
         sam=sam_model_registry[model_type](checkpoint=checkpoint)
-        # sam = torch.load(
-        #     "your wieghts here sam_tuned_save.pth"
-        # ).sam
         self.image_encoder = sam.image_encoder
         self.prompt_encoder2 = sam.prompt_encoder
         self.mask_decoder2 = sam.mask_decoder
@@ -261,9 +201,6 @@ class panc_sam(nn.Module):
             
         for param in self.prompt_encoder2.parameters():
             param.requires_grad = False
-            
-
-        
 
     def forward(self, input_images,box=None):
         
@@ -294,14 +231,10 @@ class panc_sam(nn.Module):
             )
             outputs_prompt.append(low_res_masks)
             
-            # points, point_labels = sample_prompt((low_res_masks > 0).float())
-            # points, point_labels = sample_prompt(low_res_masks)
             points, point_labels = main_prompt(low_res_masks)
             points_sconed, point_labels_sconed = sample_prompt(low_res_masks)
             points = torch.cat([points, points_sconed], dim=1)  # Adjust dimensions as necessary
-            point_labels = torch.cat([point_labels, point_labels_sconed], dim=1)
-            # raise ValueError(points , point_labels)
-            
+            point_labels = torch.cat([point_labels, point_labels_sconed], dim=1)    
             
             
             
@@ -329,31 +262,7 @@ class panc_sam(nn.Module):
         
 
         return low_res_masks, low_res_masks_promtp
-##################################end#######################################
 
-##################################Augmentation#######################################
-
-# augmentation = A.Compose(
-#     [
-#         A.Rotate(limit=30, p=0.5),
-#         A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=1),
-#         A.RandomResizedCrop(1024, 1024, scale=(0.9, 1.0), p=1),
-#         A.HorizontalFlip(p=0.5),
-#         A.CLAHE(clip_limit=2.0, tile_grid_size=(8, 8), p=0.5),
-#         A.CoarseDropout(
-#             max_holes=8,
-#             max_height=16,
-#             max_width=16,
-#             min_height=8,
-#             min_width=8,
-#             fill_value=0,
-#             p=0.5,
-#         ),
-#         A.RandomScale(scale_limit=0.3, p=0.5),
-#         # A.GaussNoise(var_limit=(10.0, 50.0), p=0.5),
-#         # A.GridDistortion(p=0.5),
-#     ]
-# )
 augmentation = A.Compose(
     [
         A.Rotate(limit=30, p=0.5),
@@ -371,36 +280,16 @@ augmentation = A.Compose(
             p=0.5,
         ),
         A.RandomScale(scale_limit=0.3, p=0.5),
-        # A.GaussNoise(var_limit=(10.0, 50.0), p=0.5),
-        # A.GridDistortion(p=0.5),
+            
     ]
 )
-##################prom load#####################
-# panc_sam_instance_point = sam_model_registry[model_type](checkpoint=checkpoint)
 panc_sam_instance = panc_sam()
-
-# for param in panc_sam_instance_point.parameters():
-#     param.requires_grad = False
 panc_sam_instance.to(device)
 panc_sam_instance.train()
-
-#################main load######################
-# panc_sam_instance = panc_sam2()
-# for param in panc_sam_instance.parameters():
-#     param.requires_grad = False
-# panc_sam_instance.to(device)
-# panc_sam_instance.train()
-##################end load model#######################
-
-##################load data#######################
-
 train_dataset = PanDataset(
-    [
-     "your addres of images"],
-    [
-     "your addres of labels"],
-    # ["your addres of images"],
-    # ["your addres of labels"],
+    [arg.dir_train],
+    [arg.dir_labels],
+
     [["NIH_PNG",1]],
     
     image_size,
@@ -410,10 +299,8 @@ train_dataset = PanDataset(
     augmentation=augmentation,
 )
 test_dataset = PanDataset(
-    [
-     "your addres of images"],
-    [
-     "your addres of labels"],
+    [arg.dir_train],
+    [arg.dir_labels],
         
     [["NIH_PNG",1]],
 
@@ -438,35 +325,11 @@ test_loader = DataLoader(
     drop_last=False,
     num_workers=num_workers,
 )
-##################end load data#######################
 
 lr = 1e-4
 #1e-3
-max_lr = 3e-4 #3e-4✅5e-4/8e-4/1e-3
-wd = 5e-4#5e-4✅/1e-4/8e-4/1e-3
-##################promt#######################
-
-# optimizer_point = torch.optim.Adam(
-#     # parameters,
-#     list(panc_sam_instance_point.mask_decoder2.parameters()),
-#     # list(panc_sam_instance.mask_decoder.parameters()),
-#     lr=lr,
-#     weight_decay=wd,
-# )
-# scheduler_point = torch.optim.lr_scheduler.OneCycleLR(
-#     optimizer_point,
-#     max_lr=max_lr,
-#     epochs=num_epochs,
-#     steps_per_epoch=sample_size // (accumaltive_batch_size // batch_size),
-# )
-#####################main####################
-
-# encoder_parameters = list(panc_sam_instance.sam.prompt_encoder.parameters())
-# decoder_parameters = list(panc_sam_instance.sam.mask_decoder2.parameters())
-
-# # Combine both sets of parameters
-# all_parameters = decoder_parameters
-
+max_lr = 3e-4
+wd = 5e-4
 optimizer_main = torch.optim.Adam(
     # parameters,
     list(panc_sam_instance.mask_decoder2.parameters()),
@@ -520,29 +383,7 @@ def process_model(main_model , data_loader, train=0, save_output=0):
         
         dice_prompt = what_the_f(low_res_masks_prompt,low_res_label)
         dice_main = what_the_f(low_res_masks_main,low_res_label)
-        # print(f'There is {label.sum()} true pixel in label')
-        # print(f'dice_main is :{dice_main}')
-
-        # points, point_labels = sample_prompt(low_res_masks_promt)
-        # points = points * 4
-        # batched_input = []
-        # for ibatch in range(batch_size):
-        #     batched_input.append(
-        #         {
-        #             "image": image[ibatch],
-        #             "point_coords": points[ibatch],
-        #             "point_labels": point_labels[ibatch],
-        #             "original_size": (1024, 1024)
-
-        #         },
-        #     )
-        ############################main#########################################
         
-        
-
-        
-        ###############################calculate evaluation matrix######################################
-
         binary_mask = normalize(threshold(low_res_masks_main, 0.0,0))
         total_dice += dice_prompt
         total_dice_main+=dice_main

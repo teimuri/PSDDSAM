@@ -30,5 +30,6 @@ python3 fine_tune_good_unet.py --sample_size 66 --accumulative_batch_size 4 --nu
 
 ```
 ## Inference Model
+To infrence both types of decoders just run the [double_decoder_infrence.py](double_decoder_infrence.py)
 
-
+To get individually infrence SAM with or without prompt use [Inference_individually.py](Inference_individually)

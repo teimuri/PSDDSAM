@@ -354,7 +354,7 @@ def create_prompt(probabilities, forground=2, background=2):
 ##########################################################################################
 
 device = "cuda:0"
-def create_prompt_yours(probabilities):
+def main_prompt(probabilities):
     probabilities = probabilities.sigmoid()
 
     # Thresholding function
@@ -408,7 +408,7 @@ def create_prompt_yours(probabilities):
     return indices.unsqueeze(0), values.unsqueeze(0)
 
 #############################versionGroundTure################################################
-# def create_prompt_yours_for_ground_true(probabilities):
+# def main_prompt_for_ground_true(probabilities):
 #     probabilities = probabilities
 #     # raise ValueError(probabilities)
 

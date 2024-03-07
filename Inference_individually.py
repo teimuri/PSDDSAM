@@ -352,10 +352,8 @@ panc_sam_instance.train()
 
 
 test_dataset = PanDataset(
-    [
-     "your images iamges"],
-    [
-     "your images address"],
+    [args.test_dir],
+    [args.test_labels_dir],
         
     [["NIH_PNG",1]],
 
@@ -364,21 +362,6 @@ test_dataset = PanDataset(
     slice_per_image=slice_per_image,
     train=False,
 ) 
-
-# test_dataset = PanDataset(
-#     [
-#      "your images iamges"],
-#     [
-#      "your images labels"],
-        
-#     [["Abdment1kPNG",4]],
-
-#     image_size,
-    
-#     slice_per_image=slice_per_image,
-#     train=False,
-# )
-
 
 test_loader = DataLoader(
     test_dataset,
