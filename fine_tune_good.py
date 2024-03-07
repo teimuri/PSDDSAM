@@ -197,7 +197,7 @@ from segment_anything import SamPredictor, sam_model_registry
 
 #         self.sam = sam_model_registry[model_type](checkpoint=checkpoint)
 #         self.sam = torch.load(
-#             "/mnt/new_drive/PanCanAid/PanCanAid-segmentation/exps/Finetune_on_NIH/sam_tuned_save.pth"
+#             "your weigghts here sam_tuned_save.pth"
 #         ).sam
 
 #         self.prompt_encoder = self.sam.prompt_encoder.clone()
@@ -236,7 +236,7 @@ class panc_sam(nn.Module):
         super().__init__(*args, **kwargs)
         
         #Promptless
-        sam = torch.load("/media/external_2T/malekahmadi/PanCanAid/PanCanAid-segmentation/exps/0-SAMwithoutprompt-5e-5_5e-4/sam_tuned_save.pth").sam
+        sam = torch.load("your weights here sam_tuned_save.pth").sam
         
         self.prompt_encoder = sam.prompt_encoder
         
@@ -250,7 +250,7 @@ class panc_sam(nn.Module):
         #with Prompt
         sam=sam_model_registry[model_type](checkpoint=checkpoint)
         # sam = torch.load(
-        #     "/media/external_2T/malekahmadi/PanCanAid/PanCanAid-segmentation/exps/continue_correct_prompt/sam_tuned_save.pth"
+        #     "your wieghts here sam_tuned_save.pth"
         # ).sam
         self.image_encoder = sam.image_encoder
         self.prompt_encoder2 = sam.prompt_encoder
@@ -396,11 +396,11 @@ panc_sam_instance.train()
 
 train_dataset = PanDataset(
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/train/images"],
+     "your addres of images"],
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/train/labels"],
-    # ["/mnt/new_drive/PanCanAid/Data/NIH_PNG/train/images"],
-    # ["/mnt/new_drive/PanCanAid/Data/NIH_PNG/train/labels"],
+     "your addres of labels"],
+    # ["your addres of images"],
+    # ["your addres of labels"],
     [["NIH_PNG",1]],
     
     image_size,
@@ -411,9 +411,9 @@ train_dataset = PanDataset(
 )
 test_dataset = PanDataset(
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/test/images"],
+     "your addres of images"],
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/test/labels"],
+     "your addres of labels"],
         
     [["NIH_PNG",1]],
 
