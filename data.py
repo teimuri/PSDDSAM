@@ -231,7 +231,7 @@ if __name__ == "__main__":
     slice_per_image = 1
     image_size = 1024
 
-    checkpoint = "/mnt/new_drive/PanCanAid/PanCanAid-segmentation/checkpoints/sam_vit_h_4b8939.pth"
+    checkpoint = "checkpoints/sam_vit_h_4b8939.pth"
     panc_sam_instance = sam_model_registry[model_type](checkpoint=checkpoint)
 
     augmentation = A.Compose(
@@ -242,23 +242,14 @@ if __name__ == "__main__":
         ]
     )
     train_dataset = PanDataset(
-        "/mnt/new_drive/PanCanAid/Data/Abdment1kPNG/train/images",
-        "/mnt/new_drive/PanCanAid/Data/Abdment1kPNG/train/labels",
+        "your images addres here",
+        "your labeles addres here",
         image_size,
         slice_per_image=slice_per_image,
         train=True,
         augmentation=None,
     )
 
-    # train_dataset = PanDataset(
-    # "/mnt/new_drive/PanCanAid/Data/Abdment1kPNG/train/images",
-    # "/mnt/new_drive/PanCanAid/Data/Abdment1kPNG/train/labels",
-    # image_size,
-    # panc_sam_instance.preprocess,
-    # slice_per_image=slice_per_image,
-    # train=True,
-    # augmentation=augmentation,
-    # )
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
