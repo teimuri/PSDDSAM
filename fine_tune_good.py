@@ -2,7 +2,7 @@ debug = 0
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import create_prompt , create_prompt_armin 
+from utils import sample_prompt , main_prompt 
 
 # import cv2
 from collections import defaultdict
@@ -294,10 +294,10 @@ class panc_sam(nn.Module):
             )
             outputs_prompt.append(low_res_masks)
             
-            # points, point_labels = create_prompt((low_res_masks > 0).float())
-            # points, point_labels = create_prompt(low_res_masks)
-            points, point_labels = create_prompt_armin(low_res_masks)
-            points_sconed, point_labels_sconed = create_prompt(low_res_masks)
+            # points, point_labels = sample_prompt((low_res_masks > 0).float())
+            # points, point_labels = sample_prompt(low_res_masks)
+            points, point_labels = main_prompt(low_res_masks)
+            points_sconed, point_labels_sconed = sample_prompt(low_res_masks)
             points = torch.cat([points, points_sconed], dim=1)  # Adjust dimensions as necessary
             point_labels = torch.cat([point_labels, point_labels_sconed], dim=1)
             # raise ValueError(points , point_labels)
@@ -523,7 +523,7 @@ def process_model(main_model , data_loader, train=0, save_output=0):
         # print(f'There is {label.sum()} true pixel in label')
         # print(f'dice_main is :{dice_main}')
 
-        # points, point_labels = create_prompt(low_res_masks_promt)
+        # points, point_labels = sample_prompt(low_res_masks_promt)
         # points = points * 4
         # batched_input = []
         # for ibatch in range(batch_size):
