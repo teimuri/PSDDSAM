@@ -178,7 +178,7 @@ class panc_sam(nn.Module):
         super().__init__(*args, **kwargs)
           
         self.sam=sam_model_registry[model_type](checkpoint=checkpoint)
-        # self.sam  = torch.load('/media/external_2T/malekahmadi/PanCanAid/PanCanAid-segmentation/exps/Finetune_on_NIH/sam_tuned_save.pth').sam
+        # self.sam  = torch.load('your fine tuned weightes /sam_tuned_save.pth').sam
         self.prompt_encoder =  self.sam.prompt_encoder
         for param in self.prompt_encoder.parameters():
             param.requires_grad = False
@@ -237,11 +237,11 @@ panc_sam_instance.to(device)
 panc_sam_instance.train()
 train_dataset = PanDataset(
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/train/images"],
+     "addres of images"],
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/train/labels"],
-    # ["/mnt/new_drive/PanCanAid/Data/NIH_PNG/train/images"],
-    # ["/mnt/new_drive/PanCanAid/Data/NIH_PNG/train/labels"],
+     "addres of labels"],
+    # ["address of images"],
+    # ["address of labels"],
     [["NIH_PNG",1]],
     
     image_size,
@@ -252,9 +252,9 @@ train_dataset = PanDataset(
 )
 test_dataset = PanDataset(
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/test/images"],
+     "address of images"],
     [
-     "/media/external_2T/malekahmadi/PanCanAid/Data/NIH_PNG/test/labels"],
+     "addres of labels"],
         
     [["NIH_PNG",1]],
 
