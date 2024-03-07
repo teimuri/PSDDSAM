@@ -78,11 +78,11 @@ class PanDataset:
 
         if self.train:
             
-            save_dir = "PanCanAid/Data/Abdment1k-npy/train/images" # your data address here
-            labels_save_dir = "PanCanAid/Data/Abdment1k-npy/train/labels" #  your data address here
+            save_dir = "your address images" # your data address here
+            labels_save_dir = "your address labels" #  your data address here
         else :
-            save_dir = "PanCanAid/Data/Abdment1k-npy/test/images"  # your data address here
-            labels_save_dir = "PanCanAid/Data/Abdment1k-npy/test/labels"  # your data address here
+            save_dir = "your address  images"  # your data address here
+            labels_save_dir = "your address labels"  # your data address here
             
         j=0
         for j in range(1):
