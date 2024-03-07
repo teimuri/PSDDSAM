@@ -1,0 +1,13 @@
+ims
+checkpoints
+__pycache__
+segment-anything
+ims_saved
+prep_ims
+*.pth
+*.npy
+*.ipynb
+release_v1
+pre.py
+exps/**
+exps/*
