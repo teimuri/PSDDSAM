@@ -22,5 +22,6 @@ For train model we use the files [fine_tune_doog.py](fine_tune_good.py) and [fin
 python3 fine_tune_good_unet.py --sample_size 66 --accumulative_batch_size 4 --num_epochs 60 --num_workers 8 --batch_step_one 20 --batch_step_two 30 --lr 3e-4 --inference
 
 ```
+## Inference Model
 
 
