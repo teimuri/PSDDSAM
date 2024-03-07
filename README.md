@@ -14,4 +14,13 @@ For this segmentation report we used to populare pancreas datas:
 
 After downloading and allocating datasets, we used a specefice data format (.npy) and for this step [save.py](/data_handler/save.py) provided. `save_dir` and `labels_save_dir` should modify.
 
-As defualt `data.py` and `data_loader_group.py` are used in the desired codes.  
+As defualt `data.py` and `data_loader_group.py` are used in the desired codes.
+
+## Train model
+For train model we use the files [fine_tune_doog.py](fine_tune_good.py) and [fine_tune_doog_unet.py](fine_tune_good_unet.py) and the command bellow is an example for start training with some costume settings.
+```
+python3 fine_tune_good_unet.py --sample_size 66 --accumulative_batch_size 4 --num_epochs 60 --num_workers 8 --batch_step_one 20 --batch_step_two 30 --lr 3e-4 --inference
+
+```
+
+
