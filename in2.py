@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import   create_prompt_armin , create_prompt
+from utils import   create_prompt_yours , create_prompt
 from collections import defaultdict
 import torchvision.transforms as transforms
 import torch
@@ -195,7 +195,7 @@ class panc_sam(nn.Module):
             outputs_prompt.append(low_res_masks)
             
             # points, point_labels = create_prompt((low_res_masks > 0).float())
-            points, point_labels = create_prompt_armin(low_res_masks)
+            points, point_labels = create_prompt_yours(low_res_masks)
             
             
             points = points * 4
