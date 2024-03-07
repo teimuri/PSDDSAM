@@ -25,7 +25,7 @@ from sklearn.model_selection import KFold
 from shutil import copyfile
 # import monai
 from tqdm import tqdm
-from utils import create_prompt_armin,create_prompt_armin_for_ground_true
+from utils import create_prompt_yours,create_prompt_yours_for_ground_true
 from torch.autograd import Variable
 
 # import wandb_handler
@@ -425,7 +425,7 @@ def process_model(data_loader, train=0, save_output=0):
         input_size = (1024, 1024)
 
         box = torch.tensor([[200, 200, 750, 800]]).to(device)
-        points, point_labels = create_prompt_armin_for_ground_true(label)
+        points, point_labels = create_prompt_yours_for_ground_true(label)
         # raise ValueError(points)
         batched_input = []
         for ibatch in range(batch_size):
@@ -506,7 +506,7 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
         index = 0
         # for image, label in tqdm(test_loader):
             
-        #     points, point_labels = create_prompt_armin(label)
+        #     points, point_labels = create_prompt_yours(label)
         #     points = torch.cat((point_labels[0].unsqueeze(1),points[0]),dim=1).long()
 
         #     # for point in points:
