@@ -260,7 +260,7 @@ class panc_sam(nn.Module):
         super().__init__(*args, **kwargs)
         # self.sam = sam_model_registry[model_type](checkpoint=checkpoint)
         self.sam = torch.load(
-            "/mnt/new_drive/PanCanAid/PanCanAid-segmentation/exps/0-both-dataset/sam_tuned_save.pth"
+            "your sam_tuned_save.pth"
         ).sam
 
 
@@ -314,17 +314,17 @@ class panc_sam(nn.Module):
     
 panc_sam_instance = panc_sam()
 # panc_sam_instance = torch.load(
-        #     "/mnt/new_drive/PanCanAid/PanCanAid-segmentation/exps/0-tenth_prompt/sam_tuned_save.pth"
+        #     "your sam_tuned_save.pth"
         # ).sam
-# panc_sam_instance.torch.load("/mnt/new_drive/PanCanAid/PanCanAid-segmentation/exps/0-tenth_prompt/sam_tuned_save.pth").sam
+# panc_sam_instance.torch.load("your sam_tuned_save.pth").sam
 panc_sam_instance.to(device)
 panc_sam_instance.eval()  # Set the model to evaluation mode
 
 test_dataset = PanDataset(
     [
-     "/mnt/new_drive/PanCanAid/Data/NIH_PNG/test/images"],
+     "your address of images"],
     [
-     "/mnt/new_drive/PanCanAid/Data/NIH_PNG/test/labels"],
+     "your address of labels"],
     [["NIH_PNG",1]],
     image_size,
     slice_per_image=slice_per_image,
