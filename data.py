@@ -13,7 +13,7 @@ import cv2
 from PIL import Image
 import cv2
 
-from pre_processer import PreProcessing
+from kernel.pre_processer import PreProcessing
 
 
 def apply_median_filter(input_matrix, kernel_size=5, sigma=0):
@@ -130,6 +130,7 @@ class PanDataset:
         target_image_size,
         slice_per_image,
         train=True,
+        ratio=0.9,
         augmentation=None,
     ):
         self.data_set_names = []
@@ -138,16 +139,29 @@ class PanDataset:
         for labels_dir, images_dir, dataset_name in zip(
             labels_dirs, images_dirs, datasets
         ):
-            self.data_set_names.extend(
-                sorted([dataset_name[0] for _ in os.listdir(labels_dir)])
-            )
+            if train == True:
+                self.data_set_names.extend(
+                    sorted([dataset_name[0] for _ in os.listdir(labels_dir)[:int(len(os.listdir(labels_dir)) * ratio)]])
+                )
 
-            self.labels_path.extend(
-                sorted([os.path.join(labels_dir, item) for item in os.listdir(labels_dir)])
-            )
-            self.images_path.extend(
-                sorted([os.path.join(images_dir, item) for item in os.listdir(images_dir)])
-            )
+                self.labels_path.extend(
+                    sorted([os.path.join(labels_dir, item) for item in os.listdir(labels_dir)[:int(len(os.listdir(labels_dir)) * ratio)]])
+                )
+                self.images_path.extend(
+                    sorted([os.path.join(images_dir, item) for item in os.listdir(images_dir)[:int(len(os.listdir(images_dir)) * ratio)]])
+                )
+            else:
+                self.data_set_names.extend(
+                sorted([dataset_name[0] for _ in os.listdir(labels_dir)[int(len(os.listdir(labels_dir)) * ratio):]])
+                )
+
+                self.labels_path.extend(
+                    sorted([os.path.join(labels_dir, item) for item in os.listdir(labels_dir)[int(len(os.listdir(labels_dir)) * ratio):]])
+                )
+                self.images_path.extend(
+                    sorted([os.path.join(images_dir, item) for item in os.listdir(images_dir)[int(len(os.listdir(images_dir)) * ratio):]])
+                )
+                
 
         self.target_image_size = target_image_size
         self.datasets = datasets
