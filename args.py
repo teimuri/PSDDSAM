@@ -19,14 +19,18 @@ def get_arguments():
     parser.add_argument('--custom_bias', type=float, default=0, help='Learning Rate')
     parser.add_argument("--inference", action="store_true", help="Set for inference")
     ########################################################################################
+    parser.add_argument(" --promptprovider" , type=str , help="path weight of prompt provider")
+    parser.add_argument(" --pointbasemodel" , type=str , help="path weight of prompt provider")
+    
     parser.add_argument("--train_dir",type=str, help="Path to the training data")
     parser.add_argument("--test_dir",type=str, help="Path to the test data")
     parser.add_argument("--test_labels_dir",type=str, help="Path to the test data")
     parser.add_argument("--train_labels_dir",type=str, help="Path to the test data")
     parser.add_argument("--images_dir",type=str, help="Path to the test data")
-    parser.add_argument("--test_dir",type=str, help="Path to the test data")
-    parser.add_argument("--test_dir",type=str, help="Path to the test data")
-    parser.add_argument("--test_dir",type=str, help="Path to the test data")
-    parser.add_argument("--test_dir",type=str, help="Path to the test data")
+    parser.add_argument("--checkpoint",type=str, help="Path to the test data")
+    parser.add_argument("--model_type",type=str, help="Path to the test data",default="vit_h")
+    
+    
+    
 
     return parser.parse_args()
