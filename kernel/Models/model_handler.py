@@ -2,8 +2,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 from utils import create_prompt_armin
-model_type = 'vit_b'
-checkpoint = '/mnt/new_drive/PanCanAid/PanCanAid-segmentation/checkpoints/sam_vit_b_01ec64.pth'
+
 device = 'cuda:0'
 
 
@@ -11,35 +10,6 @@ from segment_anything import SamPredictor, sam_model_registry
 
 
 class panc_sam(nn.Module):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        sam = torch.load(
-            "/mnt/new_drive/PanCanAid/PanCanAid-segmentation/exps/best/sam_tuned_save.pth"
-        ).sam
-
-        self.prompt_encoder = sam.prompt_encoder
-
-        self.mask_decoder = sam.mask_decoder
-        for param in self.prompt_encoder.parameters():
-            param.requires_grad = False
-
-        for param in self.mask_decoder.parameters():
-            param.requires_grad = False
-
-        # with Prompt
-
-        sam = sam_model_registry[model_type](checkpoint=checkpoint)
-
-        self.image_encoder = sam.image_encoder
-        self.prompt_encoder2 = sam.prompt_encoder
-        self.mask_decoder2 = sam.mask_decoder
-
-        for param in self.image_encoder.parameters():
-            param.requires_grad = False
-
-        for param in self.prompt_encoder2.parameters():
-            param.requires_grad = False
-
     
     def forward(self, batched_input, device):
         box = torch.tensor([[200, 200, 750, 800]]).to(device)
