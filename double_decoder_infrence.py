@@ -227,10 +227,10 @@ class panc_sam(nn.Module):
 test_dataset = PanDataset(
     [
         
-     "path image"
+     args.test_dir
      ],
     [
-     "path label"
+     args.test_labels_dir
      ],
         
     [["NIH_PNG",1]],
