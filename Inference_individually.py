@@ -228,7 +228,7 @@ class panc_sam(nn.Module):
         super().__init__(*args, **kwargs)
         
         #Promptless
-        sam = torch.load("weightes/sam_tuned_save.pth").sam
+        sam = torch.load(args.pointbasemodel).sam
         
         self.prompt_encoder = sam.prompt_encoder
         
@@ -241,7 +241,7 @@ class panc_sam(nn.Module):
         
         #with Prompt
         sam = torch.load(
-            "weightes/sam_tuned_save.pth"
+            args.promptprovider
         ).sam
         self.image_encoder = sam.image_encoder
         self.prompt_encoder2 = sam.prompt_encoder
