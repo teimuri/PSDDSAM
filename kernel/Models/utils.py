@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 
 
-def create_prompt1(masks, forground=2, background=2):
+def create_prompt_simple(masks, forground=2, background=2):
     kernel_size = 9
     kernel = nn.Conv2d(
         in_channels=1,

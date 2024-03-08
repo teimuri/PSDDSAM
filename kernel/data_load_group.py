@@ -12,7 +12,7 @@ import torch.nn.functional as F
 import cv2
 from PIL import Image
 import cv2
-from utils import create_prompt1
+from utils import create_prompt_simple
 from pre_processer import PreProcessing
 from tqdm import tqdm
 from args import get_arguments
@@ -247,7 +247,7 @@ class PanDataset:
 
             current_image_size = y.shape[-1]
 
-            points, point_labels = create_prompt1(y[:, ::2, ::2].squeeze(1).float())
+            points, point_labels = create_prompt_simple(y[:, ::2, ::2].squeeze(1).float())
             
             points *= self.target_image_size // y[:, ::2, ::2].shape[-1]
             

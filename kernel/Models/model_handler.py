@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
-from utils import create_prompt_armin
+from utils import create_prompt_main
 
 device = 'cuda:0'
 
@@ -49,7 +49,7 @@ class panc_sam(nn.Module):
 
                 # points, point_labels = create_prompt((low_res_masks > 0).float())
                 # points, point_labels = create_prompt(low_res_masks)
-                points, point_labels = create_prompt_armin(low_res_masks)
+                points, point_labels = create_prompt_main(low_res_masks)
 
 
                 points = points * 4

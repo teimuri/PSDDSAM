@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 
-def create_prompt1(masks, forground=2, background=2):
+def create_prompt_simple(masks, forground=2, background=2):
     kernel_size = 9
     kernel = nn.Conv2d(
         in_channels=1,
@@ -65,7 +65,7 @@ def create_prompt1(masks, forground=2, background=2):
 
 #
 device = "cuda:0"
-def create_prompt_armin(probabilities):
+def create_prompt_main(probabilities):
     probabilities = probabilities.sigmoid()
 
     # Thresholding function
