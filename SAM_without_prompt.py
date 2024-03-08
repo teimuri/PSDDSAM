@@ -165,8 +165,7 @@ copyfile(os.path.realpath(__file__), f"exps/{exp_id}-{user_input}/code.py")
 
 
 
-model_type =args.modeltype
-checkpoint = "checkpoints/sam_vit_h_4b8939.pth"
+
 device = "cuda:1"
 
 
@@ -178,7 +177,7 @@ class panc_sam(nn.Module):
     def __init__(self, *args, **kwargs) -> None: 
         super().__init__(*args, **kwargs)
           
-        self.sam=sam_model_registry[model_type](checkpoint=checkpoint)
+        sam=sam_model_registry[args.model_type](args.checkpoint)
         # self.sam  = torch.load('exps/sam_tuned_save.pth').sam
         self.prompt_encoder =  self.sam.prompt_encoder
         for param in self.prompt_encoder.parameters():
@@ -248,9 +247,9 @@ train_dataset = PanDataset(
     train=True,
     augmentation=augmentation,
 )
-test_dataset = PanDataset(
-    [args.test_dir],
-    [args.test_labels_dir],
+val_dataset = PanDataset(
+    [args.val_dir],
+    [args.val_labels_dir],
         
     [["NIH_PNG",1]],
 
@@ -267,10 +266,10 @@ train_loader = DataLoader(
     drop_last=False,
     num_workers=num_workers,
 )
-test_loader = DataLoader(
-    test_dataset,
+val_loader = DataLoader(
+    val_dataset,
     batch_size=batch_size,
-    collate_fn=test_dataset.collate_fn,
+    collate_fn=val_dataset.collate_fn,
     shuffle=False,
     drop_last=False,
     num_workers=num_workers,
@@ -280,7 +279,7 @@ test_loader = DataLoader(
 # Set up the optimizer, hyperparameter tuning will improve performance here
 lr = 1e-4
 
-max_lr = 3e-4 
+max_lr = 5e-5 
 wd = 5e-4
 
 
@@ -369,15 +368,15 @@ def process_model(data_loader, train=0, save_output=0):
 
     return epoch_losses, results, average_dice
 
-def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_start=7):
+def train_model(train_loader, val_loader, K_fold=False, N_fold=7, epoch_num_start=7):
     print("Train model started.")
 
     train_losses = []
     train_epochs = []
-    test_losses = []
-    test_epochs = []
+    val_losses = []
+    val_epochs = []
     dice = []
-    dice_test = []
+    dice_val = []
     results = []
 
     index = 0
@@ -396,12 +395,12 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
         dice.append(average_dice)
         train_losses.append(train_epoch_losses)
         if (average_dice) > 0.5:
-            print("Testing:")
-            test_epoch_losses, epoch_results, average_dice_test = process_model(
-                test_loader
+            print("valing:")
+            val_epoch_losses, epoch_results, average_dice_val = process_model(
+                val_loader
             )
 
-            test_losses.append(test_epoch_losses)
+            val_losses.append(val_epoch_losses)
             for i in tqdm(range(len(epoch_results[0]))):
                 if not os.path.exists(f"ims/batch_{i}"):
                     os.mkdir(f"ims/batch_{i}")
@@ -411,30 +410,30 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
 
         train_mean_losses = [mean(x) for x in train_losses]
         # raise ValueError(average_dice)
-        test_mean_losses = [mean(x) for x in test_losses]
+        val_mean_losses = [mean(x) for x in val_losses]
         np.save("train_losses.npy", train_mean_losses)
-        np.save("test_losses.npy", test_mean_losses)
+        np.save("val_losses.npy", val_mean_losses)
 
         print(f"Train Dice: {average_dice}")
         print(f"Mean train loss: {mean(train_epoch_losses)}")
 
         try:
-            dice_test.append(average_dice_test)
-            print(f"Test Dice : {average_dice_test}")
-            print(f"Mean test loss: {mean(test_epoch_losses)}")
+            dice_val.append(average_dice_val)
+            print(f"val Dice : {average_dice_val}")
+            print(f"Mean val loss: {mean(val_epoch_losses)}")
 
             results.append(epoch_results)
-            test_epochs.append(epoch)
+            val_epochs.append(epoch)
             train_epochs.append(epoch)
-            plt.plot(test_epochs, test_mean_losses, train_epochs, train_mean_losses)
+            plt.plot(val_epochs, val_mean_losses, train_epochs, train_mean_losses)
             print(last_best_dice)
             log_file.write(f'bestwieght:{last_best_dice}')
-            if average_dice_test > last_best_dice:
+            if average_dice_val > last_best_dice:
                 torch.save(panc_sam_instance, f"exps/{exp_id}-{user_input}/sam_tuned_save.pth")
 
-                last_best_dice = average_dice_test
+                last_best_dice = average_dice_val
             del epoch_results
-            del average_dice_test
+            del average_dice_val
         except:
             train_epochs.append(epoch)
             plt.plot(train_epochs, train_mean_losses)
@@ -448,10 +447,10 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
 
     
 
-    return train_losses, test_losses, results
+    return train_losses, val_losses, results
 
 
-train_losses, test_losses, results = train_model(train_loader, test_loader)
+train_losses, val_losses, results = train_model(train_loader, val_loader)
 log_file.close()
 
-# train and also test the model
+# train and also val the model
