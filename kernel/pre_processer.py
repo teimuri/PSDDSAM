@@ -1,4 +1,4 @@
-#%%
+# This code has been taken from monai
 import matplotlib.pyplot as plt
 from typing import Tuple, Optional
 import os
