@@ -38,7 +38,8 @@ To infrence both types of decoders just run the [double_decoder_infrence.py](dou
 
 To get individually infrence SAM with or without prompt use [Inference_individually.py](Inference_individually)
 
-#3D Aggregator
+## 3D Aggregator
+
 To run the `3D Aggregator` codes are available in [kernel](/kernel) folder and just run the [run.sh](kernel/run.sh) file.
 
 becuase of opening so many files, the `u -limit` thresh hold should be increased using:
