@@ -148,13 +148,8 @@ def what_the_f(low_res_masks,label):
     )
     return dice
 
-accumaltive_batch_size = 8
-batch_size = 1
-num_workers = 2
-slice_per_image = 1
-num_epochs = 80
-sample_size = 2000
-image_size = 1024
+
+image_size = args.image_size
 exp_id = 0
 found = 0
 if debug:
@@ -172,8 +167,7 @@ layer_n = 4
 L = layer_n
 a = np.full(L, layer_n)
 params = {"M": 255, "a": a, "p": 0.35}
-model_type = "vit_h"
-checkpoint = "checkpoints/sam_vit_h_4b8939.pth"
+
 device = "cuda:1"
 from segment_anything import SamPredictor, sam_model_registry
 class panc_sam(nn.Module):
@@ -181,7 +175,7 @@ class panc_sam(nn.Module):
         super().__init__(*args, **kwargs)
         
         #Promptless
-        sam = torch.load("exps/sam_tuned_save.pth").sam
+        sam = torch.load(args.promptprovider)
         
         self.prompt_encoder = sam.prompt_encoder
         
@@ -193,7 +187,7 @@ class panc_sam(nn.Module):
             param.requires_grad = False
         
         #with Prompt
-        sam=sam_model_registry[model_type](checkpoint=checkpoint)
+        sam=sam_model_registry[args.model_type](args.checkpoint)
         self.image_encoder = sam.image_encoder
         self.prompt_encoder2 = sam.prompt_encoder
         self.mask_decoder2 = sam.mask_decoder
@@ -289,43 +283,43 @@ panc_sam_instance = panc_sam()
 panc_sam_instance.to(device)
 panc_sam_instance.train()
 train_dataset = PanDataset(
-    [arg.dir_train],
-    [arg.dir_labels],
+    [args.dir_train],
+    [args.dir_labels],
 
     [["NIH_PNG",1]],
     
-    image_size,
+    args.image_size,
     
-    slice_per_image=slice_per_image,
+    slice_per_image=args.slice_per_image,
     train=True,
     augmentation=augmentation,
 )
-test_dataset = PanDataset(
-    [arg.dir_train],
-    [arg.dir_labels],
+val_dataset = PanDataset(
+    [args.dir_train],
+    [args.dir_labels],
         
     [["NIH_PNG",1]],
 
     image_size,
     
-    slice_per_image=slice_per_image,
+    slice_per_image=args.slice_per_image,
     train=False,
 ) 
 train_loader = DataLoader(
     train_dataset,
-    batch_size=batch_size,
+    batch_size=args.batch_size,
     collate_fn=train_dataset.collate_fn,
     shuffle=True,
     drop_last=False,
-    num_workers=num_workers,
+    num_workers=args.num_workers,
 )
-test_loader = DataLoader(
-    test_dataset,
-    batch_size=batch_size,
-    collate_fn=test_dataset.collate_fn,
+val_loader = DataLoader(
+    val_dataset,
+    batch_size=args.batch_size,
+    collate_fn=val_dataset.collate_fn,
     shuffle=True,
     drop_last=False,
-    num_workers=num_workers,
+    num_workers=args.num_workers,
 )
 
 lr = 1e-4
@@ -342,8 +336,8 @@ optimizer_main = torch.optim.Adam(
 scheduler_main = torch.optim.lr_scheduler.OneCycleLR(
     optimizer_main,
     max_lr=max_lr,
-    epochs=num_epochs,
-    steps_per_epoch=sample_size // (accumaltive_batch_size // batch_size),
+    epochs=args.num_epochs,
+    steps_per_epoch=args.sample_size // (args.accumulative_batch_size // args.batch_size),
 )
 #####################################################
 
@@ -370,7 +364,7 @@ def process_model(main_model , data_loader, train=0, save_output=0):
     total_dice_main =0.0
 
     counterb = 0
-    for image, label,raw_data in tqdm(data_loader, total=sample_size):
+    for image, label,raw_data in tqdm(data_loader, total=args.sample_size):
         num_samples += 1
         counterb += 1
         index += 1
@@ -395,13 +389,13 @@ def process_model(main_model , data_loader, train=0, save_output=0):
         log_file.write(str(average_dice) + "\n")
         log_file.flush()
         loss = loss_function.forward(low_res_masks_main, low_res_label)
-        loss /= accumaltive_batch_size / batch_size
+        loss /= args.accumulative_batch_size / args.batch_size
         
         if train:
             loss.backward()
         
 
-            if index % (accumaltive_batch_size / batch_size) == 0:
+            if index % (args.accumulative_batch_size / args.batch_size) == 0:
                 # print(loss)
                 optimizer_main.step()
                 scheduler_main.step()
@@ -417,32 +411,32 @@ def process_model(main_model , data_loader, train=0, save_output=0):
                 dim=0,
             )
             results = torch.cat((results, result), dim=1)
-        if index % (accumaltive_batch_size / batch_size) == 0:
+        if index % (args.accumulative_batch_size / args.batch_size) == 0:
             epoch_losses.append(loss.item())
-        if counterb == sample_size and train:
+        if counterb == args.sample_size and train:
             break
-        elif counterb == sample_size //2  and not train:
+        elif counterb == args.sample_size //2  and not train:
             break
 
     return epoch_losses, results, average_dice ,average_dice_main
 
 
-def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_start=7):
+def train_model(train_loader, val_loader, K_fold=False, N_fold=7, epoch_num_start=7):
     print("Train model started.")
 
     train_losses = []
     train_epochs = []
-    test_losses = []
-    test_epochs = []
+    val_losses = []
+    val_epochs = []
     dice = []
     dice_main = []
-    dice_test = []
-    dice_test_main =[]
+    dice_val = []
+    dice_val_main =[]
     results = []
 #########################save image##################################
     index = 0
     if debug==0:
-        for image, label , raw_data in tqdm(test_loader):
+        for image, label , raw_data in tqdm(val_loader):
             if index < 100:
                 if not os.path.exists(f"ims/batch_{index}"):
                     os.mkdir(f"ims/batch_{index}")
@@ -457,11 +451,11 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
             if index == 100:
                 break
 
-    # In each epoch we will train the model and the test it
+    # In each epoch we will train the model and the val it
     # training without k_fold cross validation:
     last_best_dice = 0
     if K_fold == False:
-        for epoch in range(num_epochs):
+        for epoch in range(args.num_epochs):
             print(f"=====================EPOCH: {epoch + 1}=====================")
             log_file.write(
                 f"=====================EPOCH: {epoch + 1}===================\n"
@@ -473,12 +467,12 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
             dice_main.append(average_dice_main)
             train_losses.append(train_epoch_losses)
             if (average_dice) > 0.5:
-                print("Testing:")
-                test_epoch_losses, epoch_results, average_dice_test,average_dice_test_main = process_model(
-                    panc_sam_instance,test_loader
+                print("validating:")
+                val_epoch_losses, epoch_results, average_dice_val,average_dice_val_main = process_model(
+                    panc_sam_instance,val_loader
                 )
 
-                test_losses.append(test_epoch_losses)
+                val_losses.append(val_epoch_losses)
                 for i in tqdm(range(len(epoch_results[0]))):
                     if not os.path.exists(f"ims/batch_{i}"):
                         os.mkdir(f"ims/batch_{i}")
@@ -493,9 +487,9 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
                     )
 
             train_mean_losses = [mean(x) for x in train_losses]
-            test_mean_losses = [mean(x) for x in test_losses]
+            val_mean_losses = [mean(x) for x in val_losses]
             np.save("train_losses.npy", train_mean_losses)
-            np.save("test_losses.npy", test_mean_losses)
+            np.save("val_losses.npy", val_mean_losses)
 
             print(f"Train Dice: {average_dice}")
             print(f"Train Dice main: {average_dice_main}")
@@ -504,26 +498,26 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
             print(f"Mean train loss: {mean(train_epoch_losses)}")
 
             try:
-                dice_test.append(average_dice_test)
-                dice_test_main.append(average_dice_test_main)
-                print(f"Test Dice : {average_dice_test}")
-                print(f"Test Dice main : {average_dice_test_main}")
+                dice_val.append(average_dice_val)
+                dice_val_main.append(average_dice_val_main)
+                print(f"val Dice : {average_dice_val}")
+                print(f"val Dice main : {average_dice_val_main}")
                 
-                print(f"Mean test loss: {mean(test_epoch_losses)}")
+                print(f"Mean val loss: {mean(val_epoch_losses)}")
 
                 results.append(epoch_results)
-                test_epochs.append(epoch)
+                val_epochs.append(epoch)
                 train_epochs.append(epoch)
-                plt.plot(test_epochs, test_mean_losses, train_epochs, train_mean_losses)
-                if average_dice_test_main > last_best_dice:
+                plt.plot(val_epochs, val_mean_losses, train_epochs, train_mean_losses)
+                if average_dice_val_main > last_best_dice:
                     torch.save(
                         panc_sam_instance,
                         f"exps/{exp_id}-{user_input}/sam_tuned_save.pth",
                     )
 
-                    last_best_dice = average_dice_test
+                    last_best_dice = average_dice_val
                 del epoch_results
-                del average_dice_test
+                del average_dice_val
             except:
                 train_epochs.append(epoch)
                 plt.plot(train_epochs, train_mean_losses)
@@ -538,10 +532,10 @@ def train_model(train_loader, test_loader, K_fold=False, N_fold=7, epoch_num_sta
     ## training with k-fold cross validation:
     
 
-    return train_losses, test_losses, results
+    return train_losses, val_losses, results
 
 
-train_losses, test_losses, results = train_model(train_loader, test_loader)
+train_losses, val_losses, results = train_model(train_loader, val_loader)
 log_file.close()
 
-# train and also test the model
+
