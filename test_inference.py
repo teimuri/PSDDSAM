@@ -25,12 +25,12 @@ from sklearn.model_selection import KFold
 from shutil import copyfile
 import monai
 from tqdm import tqdm
-from utils import create_prompt
+from utils import sample_prompt
 from torch.autograd import Variable
-
+from args import get_arguments
 # import wandb_handler
 
-
+args = get_arguments()
 def save_img(img, dir):
     img = img.clone().cpu().numpy() + 100
     if len(img.shape) == 3:
@@ -319,7 +319,7 @@ panc_sam_instance.eval()  # Set the model to evaluation mode
 
 test_dataset = PanDataset(
     [args.test_dir],
-    [args.tests_labels_dir],
+    [args.test_labels_dir],
     [["NIH_PNG",1]],
     image_size,
     slice_per_image=slice_per_image,
@@ -374,7 +374,7 @@ def process_model(data_loader, train=False, save_output=0):
         index += 1
         image = image.to(device)
         label = label.to(device).float()
-        points, point_labels = create_prompt(label)
+        points, point_labels = sample_prompt(label)
 
         batched_input = []
         for ibatch in range(batch_size):

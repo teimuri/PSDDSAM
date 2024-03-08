@@ -23,6 +23,10 @@ After downloading and allocating datasets, we used a specefice data format (.npy
 
 As defualt `data.py` and `data_loader_group.py` are used in the desired codes.
 
+Address can be modify in [args.py](args.py). 
+
+Due to anonymous code submitiom we haven't share our Model Weights.  
+
 ## Train model
 For train model we use the files [fine_tune_good.py](fine_tune_good.py) and [fine_tune_good_unet.py](fine_tune_good_unet.py) and the command bellow is an example for start training with some costume settings.
 ```
@@ -33,3 +37,14 @@ python3 fine_tune_good_unet.py --sample_size 66 --accumulative_batch_size 4 --nu
 To infrence both types of decoders just run the [double_decoder_infrence.py](double_decoder_infrence.py)
 
 To get individually infrence SAM with or without prompt use [Inference_individually.py](Inference_individually)
+
+#3D Aggregator
+To run the `3D Aggregator` codes are available in [kernel](/kernel) folder and just run the [run.sh](kernel/run.sh) file.
+
+becuase of opening so many files, the `u -limit` thresh hold should be increased using:
+
+```
+u -limit 15000
+
+```
+

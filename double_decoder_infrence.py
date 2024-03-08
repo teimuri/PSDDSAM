@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import   main_prompt , create_prompt
+from utils import   main_prompt , sample_prompt
 from collections import defaultdict
 import torchvision.transforms as transforms
 import torch
@@ -21,8 +21,9 @@ from sklearn.model_selection import KFold
 from shutil import copyfile
 from torch.nn.functional import threshold, normalize
 import torchvision.transforms.functional as TF
+from args import get_arguments
 
-
+args = get_arguments()
 
 def dice_coefficient(logits, gt):
     
@@ -181,7 +182,7 @@ class panc_sam(nn.Module):
             with torch.no_grad():
                 sparse_embeddings, dense_embeddings = self.prompt_encoder(
                 points=None,
-                boxes=box,
+                boxes=None,
                 masks=None,
                 )
             
@@ -194,7 +195,7 @@ class panc_sam(nn.Module):
             )
             outputs_prompt.append(low_res_masks)
             
-            # points, point_labels = create_prompt((low_res_masks > 0).float())
+            # points, point_labels = sample_prompt((low_res_masks > 0).float())
             points, point_labels = main_prompt(low_res_masks)
             
             

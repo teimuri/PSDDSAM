@@ -23,7 +23,7 @@ import cv2
 #         image = plt.imread(image_path)
 #         label = plt.imread(label_path)
         
-#         # Perform your preprocessing steps here
+#         # Perform preprocessing steps here
 #         # ...
         
 #         preprocessed_images.append(image)
@@ -33,7 +33,7 @@ import cv2
 
 
 class PanDataset:
-    def __init__(self, images_dir, labels_dir, slice_per_image, train=True):
+    def __init__(self, images_dir, labels_dir, slice_per_image, train=True,**kwargs):
         #for Abdonomial
         self.images_path = sorted([os.path.join(images_dir, item[:item.rindex('.')] + '_0000.npz') for item in os.listdir(labels_dir) if item.endswith('.npz') and not item.startswith('.')])
         self.labels_path = sorted([os.path.join(labels_dir, item) for item in os.listdir(labels_dir) if item.endswith('.npz') and not item.startswith('.')])
@@ -55,7 +55,7 @@ class PanDataset:
         else:
             self.labels_path = self.labels_path[n:]
             self.images_path = self.images_path[n:]            
-
+        self.args=kwargs['args']
 
         
     def __getitem__(self, idx):
@@ -78,11 +78,11 @@ class PanDataset:
 
         if self.train:
             
-            save_dir = args.images_dir # data address here
-            labels_save_dir = args.images_dir #  label address here
+            save_dir = self.args.images_dir # data address here
+            labels_save_dir = self.args.labels_dir #  label address here
         else :
-            save_dir = args.iamges_dir  # data address here
-            labels_save_dir = args.labels_dir  # label address here
+            save_dir = self.args.test_images_dir  # data address here
+            labels_save_dir = self.args.test_labels_dir  # label address here
             
         j=0
         for j in range(1):
@@ -102,7 +102,7 @@ class PanDataset:
                 max_val = resized_image_array.max()
                 normalized_image_array = ((resized_image_array - min_val) / (max_val - min_val) * 255).astype(np.uint8)
                 image_paths.append(f"slice_{i}_{idx}.npy")
-                print(i)
+
                 if normalized_image_array.max()>0:
                     np.save(os.path.join(save_dir, image_paths[-1]), normalized_image_array)
                     
@@ -152,7 +152,7 @@ if __name__ == '__main__':
         # pass
         # print(images.shape, labels.shape)
         continue
-    dataset = PanDataset('../../Data/AbdomenCT-1K/numpy/images', '../../Data/AbdomenCT-1K/numpy/labels', 
+    dataset = PanDataset(f'{args.train_dir}/numpy/images', f'{args.train_dir}/numpy/labels', 
                          train = False , slice_per_image=slice_per_image)
     # x, y = dataset[7]
     # # print(x.shape, y.shape)

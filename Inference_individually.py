@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import create_prompt
+from utils import sample_prompt
 from collections import defaultdict
 import torchvision.transforms as transforms
 import torch
@@ -19,9 +19,9 @@ from time import time
 from PIL import Image
 from sklearn.model_selection import KFold
 from shutil import copyfile
-
+from args import get_arguments
 # import wandb_handler
-
+args = get_arguments()
 
 def save_img(img, dir):
     img = img.clone().cpu().numpy() + 100
@@ -273,7 +273,7 @@ class panc_sam(nn.Module):
             with torch.no_grad():
                 sparse_embeddings, dense_embeddings = self.prompt_encoder(
                 points=None,
-                boxes=box,
+                boxes=None,
                 masks=None,
                 )
             
@@ -286,8 +286,8 @@ class panc_sam(nn.Module):
             )
             outputs_prompt.append(low_res_masks)
             # raise ValueError(low_res_masks)
-            # points, point_labels = create_prompt((low_res_masks > 0).float())
-            points, point_labels = create_prompt(low_res_masks)
+            # points, point_labels = sample_prompt((low_res_masks > 0).float())
+            points, point_labels = sample_prompt(low_res_masks)
             
             
             points = points * 4

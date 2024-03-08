@@ -21,7 +21,9 @@ from time import time
 from PIL import Image
 from sklearn.model_selection import KFold
 from shutil import copyfile
+from args import get_arguments
 
+args = get_arguments()
 def save_img(img, dir):
     img = img.clone().cpu().numpy() + 100
 
@@ -218,7 +220,7 @@ class panc_sam(nn.Module):
             with torch.no_grad():
                 sparse_embeddings, dense_embeddings = self.prompt_encoder(
                 points=None,
-                boxes=box,
+                boxes=None,
                 masks=None,
                 )
             

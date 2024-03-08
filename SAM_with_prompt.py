@@ -27,9 +27,10 @@ from shutil import copyfile
 from tqdm import tqdm
 from utils import main_prompt,main_prompt_for_ground_true
 from torch.autograd import Variable
+from args import get_arguments
 
 # import wandb_handler
-
+args = get_arguments()
 
 def save_img(img, dir):
     img = img.clone().cpu().numpy() + 100

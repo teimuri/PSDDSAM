@@ -196,7 +196,7 @@ class panc_sam(nn.Module):
             with torch.no_grad():
                 sparse_embeddings, dense_embeddings = self.sam.prompt_encoder(
                 points=None,
-                boxes=box,
+                boxes=None,
                 masks=None,
             )
             
@@ -238,7 +238,7 @@ panc_sam_instance.to(device)
 panc_sam_instance.train()
 train_dataset = PanDataset(
     [args.train_dir],
-    [args.train_label_dir],
+    [args.train_labels_dir],
 
     [["NIH_PNG",1]],
     
@@ -250,7 +250,7 @@ train_dataset = PanDataset(
 )
 test_dataset = PanDataset(
     [args.test_dir],
-    [args.test_label_dir],
+    [args.test_labels_dir],
         
     [["NIH_PNG",1]],
 

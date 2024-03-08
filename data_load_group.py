@@ -12,7 +12,7 @@ import torch.nn.functional as F
 import cv2
 from PIL import Image
 import cv2
-from utils import create_prompt
+from utils import sample_prompt
 from pre_processer import PreProcessing
 
 
@@ -241,7 +241,7 @@ class PanDataset:
         # if (last_index -first_index)%8!=0:
         #     last_index = first_index + 8*((last_index -first_index)//8)
 
-        points, point_labels = create_prompt(labels)
+        points, point_labels = sample_prompt(labels)
 
         batched_input = []
         

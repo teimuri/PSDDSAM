@@ -18,15 +18,13 @@ def get_arguments():
     parser.add_argument('--conv_model', type=str, default=None, help='Path to convolution model')
     parser.add_argument('--custom_bias', type=float, default=0, help='Learning Rate')
     parser.add_argument("--inference", action="store_true", help="Set for inference")
-    ########################################################################################
+    parser.add_argument("--conv_path", type=str, help="Path for convolutional model path (normally found in exps folder)")
+    
     parser.add_argument("--train_dir",type=str, help="Path to the training data")
     parser.add_argument("--test_dir",type=str, help="Path to the test data")
     parser.add_argument("--test_labels_dir",type=str, help="Path to the test data")
     parser.add_argument("--train_labels_dir",type=str, help="Path to the test data")
-    parser.add_argument("--images_dir",type=str, help="Path to the test data")
-    parser.add_argument("--test_dir",type=str, help="Path to the test data")
-    parser.add_argument("--test_dir",type=str, help="Path to the test data")
-    parser.add_argument("--test_dir",type=str, help="Path to the test data")
-    parser.add_argument("--test_dir",type=str, help="Path to the test data")
+
+    parser.add_argument("--model_path",type=str, help="Path to the test data")
 
     return parser.parse_args()
