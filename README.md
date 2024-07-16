@@ -1,4 +1,8 @@
+
 # Pancreas Segmentation in CT Scan Images: Harnessing the Power of SAM
+
+You can view our latest update on the final branch.
+
 <p align="center">
   <img width="100%" src="Docs/ffpip.png">
 </p>
